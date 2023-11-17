@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -64,6 +65,13 @@ fun ConfigScreen(
                         .width(256.dp),
                 ) {
                     Text(stringResource(R.string.label_enter))
+                }
+                uiState.maybeException?.let {
+                    Text(
+                        text = stringResource(R.string.label_error, it),
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(8.dp),
+                    )
                 }
             }
         }

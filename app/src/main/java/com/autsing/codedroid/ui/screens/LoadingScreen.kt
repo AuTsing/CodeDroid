@@ -36,7 +36,7 @@ fun LoadingScreen() {
                 )
                 Text(
                     text = stringResource(R.string.label_loading),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 24.sp,
                 )
             }
