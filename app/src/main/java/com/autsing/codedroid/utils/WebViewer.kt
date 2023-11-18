@@ -50,7 +50,6 @@ class WebViewer @Inject constructor() {
             settings.pluginState = WebSettings.PluginState.ON
             settings.mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
             settings.safeBrowsingEnabled = true
-
             settings.mediaPlaybackRequiresUserGesture = true
             settings.blockNetworkImage = true
             settings.setGeolocationEnabled(true)

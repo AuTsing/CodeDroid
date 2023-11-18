@@ -5,11 +5,9 @@ import android.view.KeyEvent
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import com.autsing.codedroid.R
 import com.autsing.codedroid.ui.graphs.MainGraph
 import com.autsing.codedroid.ui.theme.CodeDroidTheme
-import com.autsing.codedroid.ui.viewmodels.MainViewModel
 import com.autsing.codedroid.utils.WebViewer
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -18,8 +16,6 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
     @Inject
     lateinit var webViewer: WebViewer
-
-    private val mainViewModel: MainViewModel by viewModels()
 
     private var tryFinishAt: Long = 0
 

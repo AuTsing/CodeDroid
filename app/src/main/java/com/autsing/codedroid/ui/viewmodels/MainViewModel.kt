@@ -14,7 +14,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-const val DEFAULT_IP = "localhost"
+const val DEFAULT_IP = "127.0.0.1"
 const val DEFAULT_PORT = "8080"
 
 data class MainUiState(

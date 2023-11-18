@@ -1,6 +1,7 @@
 package com.autsing.codedroid.ui.graphs
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -19,6 +20,10 @@ enum class MainGraphDestinations(
 fun MainGraph(
     mainViewModel: MainViewModel = viewModel(),
 ) {
+    LaunchedEffect(Unit) {
+        mainViewModel.handleGotoCode()
+    }
+
     NavHost(
         navController = mainViewModel.getNavController(),
         startDestination = MainGraphDestinations.Config.route,
