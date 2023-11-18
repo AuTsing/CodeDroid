@@ -1,12 +1,12 @@
 package com.autsing.codedroid.utils
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -18,25 +18,55 @@ import javax.inject.Singleton
 import kotlin.coroutines.resume
 
 @Singleton
-class WebViewer @Inject constructor(
-    @ApplicationContext private val applicationContext: Context,
-) {
+class WebViewer @Inject constructor() {
     private val coroutineScope: CoroutineScope = CoroutineScope(Job() + Dispatchers.IO)
-    val webView: WebView = WebView(applicationContext).apply {
-        settings.javaScriptEnabled = true
-        settings.javaScriptCanOpenWindowsAutomatically = true
-        settings.allowFileAccess = true
-        settings.allowContentAccess = true
-        settings.loadsImagesAutomatically = true
-        settings.defaultTextEncodingName = "utf-8"
-        settings.domStorageEnabled = true
-        settings.cacheMode = WebSettings.LOAD_DEFAULT
-        settings.useWideViewPort = true
-        settings.loadWithOverviewMode = true
-        settings.builtInZoomControls = false
+    var maybeWebView: WebView? = null
+
+    init {
+        WebView.setWebContentsDebuggingEnabled(true)
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    fun initWebView(context: Context) {
+        maybeWebView = WebView(context).apply {
+            settings.javaScriptEnabled = true
+            settings.javaScriptCanOpenWindowsAutomatically = true
+            settings.allowFileAccess = true
+            settings.allowContentAccess = true
+            settings.allowFileAccessFromFileURLs = true
+            settings.allowUniversalAccessFromFileURLs = true
+            settings.loadsImagesAutomatically = true
+            settings.defaultTextEncodingName = "utf-8"
+            settings.domStorageEnabled = true
+            settings.databaseEnabled = true
+            settings.cacheMode = WebSettings.LOAD_DEFAULT
+            settings.useWideViewPort = true
+            settings.loadWithOverviewMode = true
+            settings.builtInZoomControls = false
+            settings.setSupportMultipleWindows(true)
+            settings.setSupportZoom(true)
+            settings.builtInZoomControls = true
+            settings.displayZoomControls = false
+            settings.pluginState = WebSettings.PluginState.ON
+            settings.mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
+            settings.safeBrowsingEnabled = true
+
+            settings.mediaPlaybackRequiresUserGesture = true
+            settings.blockNetworkImage = true
+            settings.setGeolocationEnabled(true)
+        }
+    }
+
+    fun clearWebView() {
+        maybeWebView = null
     }
 
     suspend fun open(url: String): Result<Unit> = suspendCancellableCoroutine { continuation ->
+        if (maybeWebView == null) {
+            continuation.resume(Result.failure(Exception("WebView not initialized")))
+            return@suspendCancellableCoroutine
+        }
+        val webView = maybeWebView!!
         webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView, url: String) {
                 super.onPageFinished(view, url)

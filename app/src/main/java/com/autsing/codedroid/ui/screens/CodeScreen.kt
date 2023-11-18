@@ -17,9 +17,9 @@ fun CodeScreen(
     if (uiState.loading) {
         LoadingScreen()
     } else {
-        CodeContent(
-            webView = vm.getWebView(),
-        )
+        vm.getMaybeWebView()?.let {
+            CodeContent(it)
+        }
     }
 }
 

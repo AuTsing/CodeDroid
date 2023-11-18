@@ -33,8 +33,8 @@ class MainViewModel @Inject constructor(
     var uiState by mutableStateOf(MainUiState())
         private set
 
-    fun getWebView(): WebView {
-        return webViewer.webView
+    fun getMaybeWebView(): WebView? {
+        return webViewer.maybeWebView
     }
 
     fun getNavController(): NavHostController {
