@@ -22,41 +22,39 @@ class WebViewer @Inject constructor() {
     private val coroutineScope: CoroutineScope = CoroutineScope(Job() + Dispatchers.IO)
     var maybeWebView: WebView? = null
 
-    init {
-        WebView.setWebContentsDebuggingEnabled(true)
-    }
-
     @SuppressLint("SetJavaScriptEnabled")
     fun initWebView(context: Context) {
         maybeWebView = WebView(context).apply {
             settings.javaScriptEnabled = true
             settings.javaScriptCanOpenWindowsAutomatically = true
+            settings.useWideViewPort = true
             settings.allowFileAccess = true
-            settings.allowContentAccess = true
-            settings.allowFileAccessFromFileURLs = true
-            settings.allowUniversalAccessFromFileURLs = true
-            settings.loadsImagesAutomatically = true
-            settings.defaultTextEncodingName = "utf-8"
             settings.domStorageEnabled = true
             settings.databaseEnabled = true
             settings.cacheMode = WebSettings.LOAD_DEFAULT
-            settings.useWideViewPort = true
             settings.loadWithOverviewMode = true
-            settings.builtInZoomControls = false
+            settings.defaultTextEncodingName = "utf-8"
+            settings.loadsImagesAutomatically = true
             settings.setSupportMultipleWindows(true)
-            settings.setSupportZoom(true)
-            settings.builtInZoomControls = true
-            settings.displayZoomControls = false
-            settings.pluginState = WebSettings.PluginState.ON
-            settings.mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
-            settings.safeBrowsingEnabled = true
-            settings.mediaPlaybackRequiresUserGesture = true
-            settings.blockNetworkImage = true
-            settings.setGeolocationEnabled(true)
+            settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+//            settings.allowUniversalAccessFromFileURLs = true
+//            webChromeClient = object : WebChromeClient() {
+//                override fun onCreateWindow(
+//                    view: WebView?,
+//                    isDialog: Boolean,
+//                    isUserGesture: Boolean,
+//                    resultMsg: Message?
+//                ): Boolean {
+//                    Log.d(TAG, "onCreateWindow: ")
+//                    return super.onCreateWindow(view, isDialog, isUserGesture, resultMsg)
+//                }
+//            }
         }
     }
 
     fun clearWebView() {
+        maybeWebView?.removeAllViews()
+        maybeWebView?.destroy()
         maybeWebView = null
     }
 
