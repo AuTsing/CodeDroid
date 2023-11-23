@@ -2,11 +2,16 @@ package com.autsing.codedroid.utils
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.net.Uri
+import android.webkit.ValueCallback
+import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.Toast
+import com.autsing.codedroid.activities.MainActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -16,6 +21,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resume
+
 
 @Singleton
 class WebViewer @Inject constructor() {
@@ -49,6 +55,28 @@ class WebViewer @Inject constructor() {
 //                    return super.onCreateWindow(view, isDialog, isUserGesture, resultMsg)
 //                }
 //            }
+            webChromeClient = object : WebChromeClient() {
+                override fun onShowFileChooser(
+                    webView: WebView,
+                    filePathCallback: ValueCallback<Array<Uri>>,
+                    fileChooserParams: FileChooserParams,
+                ): Boolean {
+                    coroutineScope.launch {
+                        try {
+                            val intent = fileChooserParams.createIntent()
+                            val channel = MainActivity.requestFileChosen(intent).getOrThrow()
+                            val uris = channel.receive().getOrThrow()
+                            filePathCallback.onReceiveValue(uris)
+                        } catch (e: Exception) {
+                            filePathCallback.onReceiveValue(emptyArray())
+                        }
+                    }
+                    return true
+                }
+            }
+            setDownloadListener { url, userAgent, contentDisposition, mimetype, contentLength ->
+                Toast.makeText(context, "暂不支持下载: $url", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
