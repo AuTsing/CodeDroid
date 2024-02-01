@@ -135,12 +135,14 @@ class WebViewer @Inject constructor() {
     suspend fun open(url: String): Result<Unit> = runCatching {
         maybeWebView?.loadUrl(url)
         withTimeout(10000) {
-            delay(1000)
-            if (maybeException != null) {
-                throw maybeException as Exception
-            }
-            if (loaded) {
-                return@withTimeout
+            while (true) {
+                delay(1000)
+                if (maybeException != null) {
+                    throw maybeException as Exception
+                }
+                if (loaded) {
+                    return@withTimeout
+                }
             }
         }
     }
