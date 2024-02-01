@@ -14,6 +14,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+const val DEFAULT_PROTOCOL = "http"
 const val DEFAULT_IP = "127.0.0.1"
 const val DEFAULT_PORT = "8080"
 
@@ -57,8 +58,8 @@ class MainViewModel @Inject constructor(
                     popUpTo(navController.graph.findStartDestination().id)
                     launchSingleTop = true
                 }
-                val url = "http://${uiState.ip}:${uiState.port}/"
-                webViewer.openWithMinDelay(url).getOrThrow()
+                val url = "$DEFAULT_PROTOCOL://${uiState.ip}:${uiState.port}/"
+                webViewer.open(url).getOrThrow()
                 uiState = uiState.copy(loading = false)
             } catch (e: Exception) {
                 uiState = uiState.copy(maybeException = e.message)

@@ -22,49 +22,46 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
     companion object {
         var instance: WeakReference<ComponentActivity> = WeakReference(null)
 
-        suspend fun requestFileChosen(intent: Intent): Result<Channel<Result<Array<Uri>>>> {
-            return try {
-                withTimeout(3000) {
-                    while (instance.get() == null) delay(10)
-                }
-                val activity = instance.get()!! as MainActivity
-                val channel = Channel<Result<Array<Uri>>>()
-                activity.channels.add(channel as Channel<Result<Uri>>)
-                lateinit var launcher: ActivityResultLauncher<Intent>
-                launcher = activity.activityResultRegistry.register(
-                    "requestFileChosen",
-                    ActivityResultContracts.StartActivityForResult(),
-                ) {
-                    when (it.resultCode) {
-                        RESULT_OK -> {
-                            val uris = mutableListOf<Uri>()
-                            it.data?.dataString?.let { ds ->
-                                val uri = Uri.parse(ds)
-                                uris.add(uri)
-                            }
-                            it.data?.clipData?.let { cds ->
-                                for (i in 0..cds.itemCount) {
-                                    val cd = cds.getItemAt(i)
-                                    uris.add(cd.uri)
-                                }
-                            }
-                            channel.trySend(Result.success(uris.toTypedArray()))
-                        }
-
-                        RESULT_CANCELED -> channel.trySend(Result.failure(Exception("RESULT_CANCELED")))
-                        RESULT_FIRST_USER -> channel.trySend(Result.failure(Exception("RESULT_FIRST_USER")))
-                    }
-                    launcher.unregister()
-                }
-                launcher.launch(intent)
-                Result.success(channel)
-            } catch (e: Exception) {
-                Result.failure(e)
+        suspend fun requestFileChosen(
+            intent: Intent,
+        ): Result<Channel<Result<Array<Uri>>>> = runCatching {
+            withTimeout(3000) {
+                while (instance.get() == null) delay(10)
             }
+            val activity = instance.get()!! as MainActivity
+            val channel = Channel<Result<Array<Uri>>>()
+            activity.channels.add(channel as Channel<Result<Uri>>)
+            lateinit var launcher: ActivityResultLauncher<Intent>
+            launcher = activity.activityResultRegistry.register(
+                "requestFileChosen",
+                ActivityResultContracts.StartActivityForResult(),
+            ) {
+                when (it.resultCode) {
+                    RESULT_OK -> {
+                        val uris = mutableListOf<Uri>()
+                        it.data?.dataString?.let { ds ->
+                            val uri = Uri.parse(ds)
+                            uris.add(uri)
+                        }
+                        it.data?.clipData?.let { cds ->
+                            for (i in 0..cds.itemCount) {
+                                val cd = cds.getItemAt(i)
+                                uris.add(cd.uri)
+                            }
+                        }
+                        channel.trySend(Result.success(uris.toTypedArray()))
+                    }
+
+                    RESULT_CANCELED -> channel.trySend(Result.success(emptyArray()))
+                    RESULT_FIRST_USER -> channel.trySend(Result.failure(Exception("RESULT_FIRST_USER")))
+                }
+                launcher.unregister()
+            }
+            launcher.launch(intent)
+            return@runCatching channel
         }
     }
 
