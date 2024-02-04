@@ -3,6 +3,8 @@ package com.autsing.codedroid.utils
 import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
+import android.util.Log
+import android.view.View
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
@@ -14,7 +16,9 @@ import androidx.webkit.WebResourceErrorCompat
 import androidx.webkit.WebViewAssetLoader
 import androidx.webkit.WebViewClientCompat
 import androidx.webkit.WebViewFeature
+import com.autsing.codedroid.TAG
 import com.autsing.codedroid.activities.MainActivity
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -27,12 +31,18 @@ import javax.inject.Singleton
 
 
 @Singleton
-class WebViewer @Inject constructor() {
+class WebViewer @Inject constructor(
+    @ApplicationContext private val context: Context,
+) {
     private val coroutineScope: CoroutineScope = CoroutineScope(Job() + Dispatchers.IO)
     private val assetLoader: WebViewAssetLoader = WebViewAssetLoader.Builder().build()
     var maybeWebView: WebView? = null
     var loaded: Boolean = false
     var maybeException: Exception? = null
+
+    init {
+        initWebView(context)
+    }
 
     @SuppressLint("SetJavaScriptEnabled")
     fun initWebView(context: Context) {
@@ -66,11 +76,6 @@ class WebViewer @Inject constructor() {
                     return false
                 }
 
-                override fun onPageFinished(view: WebView, url: String) {
-                    super.onPageFinished(view, url)
-                    loaded = true
-                }
-
                 override fun onReceivedError(
                     view: WebView,
                     request: WebResourceRequest,
@@ -100,7 +105,8 @@ class WebViewer @Inject constructor() {
                     coroutineScope.launch {
                         try {
                             val intent = fileChooserParams.createIntent()
-                            val channel = MainActivity.requestFileChosen(intent).getOrThrow()
+                            val channel = MainActivity.requestFileChosen(intent)
+                                .getOrThrow()
                             val uris = channel.receive().getOrThrow()
                             filePathCallback.onReceiveValue(uris)
                         } catch (e: Exception) {
@@ -111,6 +117,7 @@ class WebViewer @Inject constructor() {
                                     Toast.LENGTH_SHORT,
                                 ).show()
                             }
+                            Log.d(TAG, "onShowFileChooser: $e")
                             filePathCallback.onReceiveValue(null)
                         }
                     }
@@ -118,25 +125,23 @@ class WebViewer @Inject constructor() {
                 }
 
                 override fun onProgressChanged(view: WebView, newProgress: Int) {
-
+                    if (newProgress == 100) {
+                        loaded = true
+                    }
                 }
             }
 
             setDownloadListener { url, userAgent, contentDisposition, mimetype, contentLength ->
                 Toast.makeText(context, "暂不支持下载: $url", Toast.LENGTH_SHORT).show()
             }
+
+            setLayerType(View.LAYER_TYPE_HARDWARE, null)
         }
     }
 
-    fun clearWebView() {
-        loaded = false
-        maybeException = null
-        maybeWebView?.removeAllViews()
-        maybeWebView?.destroy()
-        maybeWebView = null
-    }
-
     suspend fun open(url: String): Result<Unit> = runCatching {
+        maybeException = null
+        loaded = false
         maybeWebView?.loadUrl(url)
         withTimeout(10000) {
             while (true) {

@@ -11,13 +11,11 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import com.autsing.codedroid.R
 import com.autsing.codedroid.ui.graphs.MainGraph
-import com.autsing.codedroid.utils.WebViewer
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeout
 import java.lang.ref.WeakReference
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -32,7 +30,6 @@ class MainActivity : ComponentActivity() {
             }
             val activity = instance.get()!! as MainActivity
             val channel = Channel<Result<Array<Uri>>>()
-            activity.channels.add(channel as Channel<Result<Uri>>)
             lateinit var launcher: ActivityResultLauncher<Intent>
             launcher = activity.activityResultRegistry.register(
                 "requestFileChosen",
@@ -64,23 +61,15 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    @Inject
-    lateinit var webViewer: WebViewer
-
     private var tryFinishAt: Long = 0
-
-    private val channels: MutableList<Channel<Result<Uri>>> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         instance = WeakReference(this)
-
         setContent { MainGraph() }
     }
 
     override fun onDestroy() {
-        channels.clear()
-        webViewer.clearWebView()
         instance = WeakReference(null)
         super.onDestroy()
     }
