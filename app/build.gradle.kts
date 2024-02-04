@@ -1,3 +1,5 @@
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -55,6 +57,16 @@ android {
             .forEach {
                 it.outputFileName = "CodeDroid_v${versionName}_${buildType.name}.apk"
             }
+    }
+
+    signingConfigs {
+        getByName("debug") {
+            val properties = gradleLocalProperties(rootDir)
+            storeFile = file(properties.getProperty("STORE_FILE"))
+            storePassword = properties.getProperty("STORE_PASSWORD")
+            keyAlias = properties.getProperty("KEY_ALIAS")
+            keyPassword = properties.getProperty("KEY_PASSWORD")
+        }
     }
 }
 
