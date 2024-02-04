@@ -116,6 +116,10 @@ class WebViewer @Inject constructor() {
                     }
                     return true
                 }
+
+                override fun onProgressChanged(view: WebView, newProgress: Int) {
+
+                }
             }
 
             setDownloadListener { url, userAgent, contentDisposition, mimetype, contentLength ->

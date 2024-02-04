@@ -6,11 +6,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavHostController
 import com.autsing.codedroid.ui.graphs.MainGraphDestinations
+import com.autsing.codedroid.utils.Navigator
 import com.autsing.codedroid.utils.WebViewer
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -28,18 +29,15 @@ data class MainUiState(
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val webViewer: WebViewer,
-    private val navController: NavHostController,
+    private val navigator: Navigator,
 ) : ViewModel() {
-
     var uiState by mutableStateOf(MainUiState())
         private set
+    val destination = navigator.observeDestination()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), MainGraphDestinations.Config)
 
     fun getMaybeWebView(): WebView? {
         return webViewer.maybeWebView
-    }
-
-    fun getNavController(): NavHostController {
-        return navController
     }
 
     fun handleChangeIp(ip: String) {
@@ -54,19 +52,13 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 uiState = uiState.copy(loading = true)
-                navController.navigate(MainGraphDestinations.Code.route) {
-                    popUpTo(navController.graph.findStartDestination().id)
-                    launchSingleTop = true
-                }
+                navigator.navigateTo(MainGraphDestinations.Code)
                 val url = "$DEFAULT_PROTOCOL://${uiState.ip}:${uiState.port}/"
                 webViewer.open(url).getOrThrow()
                 uiState = uiState.copy(loading = false)
             } catch (e: Exception) {
                 uiState = uiState.copy(maybeException = e.message)
-                navController.navigate(MainGraphDestinations.Config.route) {
-                    popUpTo(navController.graph.findStartDestination().id)
-                    launchSingleTop = true
-                }
+                navigator.navigateTo(MainGraphDestinations.Config)
             }
         }
     }

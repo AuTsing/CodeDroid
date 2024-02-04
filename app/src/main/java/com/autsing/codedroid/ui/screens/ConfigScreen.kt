@@ -22,7 +22,6 @@ import com.autsing.codedroid.ui.viewmodels.DEFAULT_IP
 import com.autsing.codedroid.ui.viewmodels.DEFAULT_PORT
 import com.autsing.codedroid.ui.viewmodels.MainViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConfigScreen(
     vm: MainViewModel = viewModel(),

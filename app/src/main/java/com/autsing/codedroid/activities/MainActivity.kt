@@ -11,7 +11,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import com.autsing.codedroid.R
 import com.autsing.codedroid.ui.graphs.MainGraph
-import com.autsing.codedroid.ui.theme.CodeDroidTheme
 import com.autsing.codedroid.utils.WebViewer
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.channels.Channel
@@ -76,13 +75,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         instance = WeakReference(this)
 
-        webViewer.initWebView(this)
-
-        setContent {
-            CodeDroidTheme {
-                MainGraph()
-            }
-        }
+        setContent { MainGraph() }
     }
 
     override fun onDestroy() {
