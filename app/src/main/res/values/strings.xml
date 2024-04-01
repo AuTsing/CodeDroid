@@ -1,9 +1,0 @@
-<resources>
-    <string name="app_name">CodeDroid</string>
-    <string name="label_loading">Loading</string>
-    <string name="label_enter">Enter</string>
-    <string name="label_ip">IP</string>
-    <string name="label_port">Port</string>
-    <string name="label_error">Error: %s</string>
-    <string name="text_activity_finish_confirmation">Press again to exit</string>
-</resources>
