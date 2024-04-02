@@ -2,6 +2,7 @@ package com.autsing.codedroid
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -49,6 +50,14 @@ class MainActivity : AppCompatActivity() {
         WebActivity.maybeException?.let {
             textErrorMessage.text = it.message
         }
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            finish()
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
     }
 
     fun onClickGo(view: View) {
