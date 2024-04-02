@@ -36,8 +36,7 @@ jobs:
             - name: Build
               run: |
                   chmod +x ./gradlew
-                  ./gradlew assembleRelease --stacktrace
-                  ls ./app/release
+                  ./gradlew :app:assembleRelease --stacktrace
 
             - name: Release
               uses: actions/upload-artifact@v4
