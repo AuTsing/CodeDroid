@@ -20,6 +20,23 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        getByName("debug") {
+            val properties = gradleLocalProperties(rootDir, providers)
+            storeFile = file(properties.getProperty("STORE_FILE"))
+            storePassword = properties.getProperty("STORE_PASSWORD")
+            keyAlias = properties.getProperty("KEY_ALIAS")
+            keyPassword = properties.getProperty("KEY_PASSWORD")
+        }
+        create("release") {
+            val properties = gradleLocalProperties(rootDir, providers)
+            storeFile = file(properties.getProperty("STORE_FILE"))
+            storePassword = properties.getProperty("STORE_PASSWORD")
+            keyAlias = properties.getProperty("KEY_ALIAS")
+            keyPassword = properties.getProperty("KEY_PASSWORD")
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -27,6 +44,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 
@@ -44,16 +62,6 @@ android {
             .forEach {
                 it.outputFileName = "${rootProject.name}_v${versionName}_${buildType.name}.apk"
             }
-    }
-
-    signingConfigs {
-        getByName("debug") {
-            val properties = gradleLocalProperties(rootDir, providers)
-            storeFile = file(properties.getProperty("STORE_FILE"))
-            storePassword = properties.getProperty("STORE_PASSWORD")
-            keyAlias = properties.getProperty("KEY_ALIAS")
-            keyPassword = properties.getProperty("KEY_PASSWORD")
-        }
     }
 }
 
