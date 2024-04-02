@@ -19,7 +19,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.just.agentweb.AgentWeb
-import com.just.agentweb.AgentWebConfig
 import com.just.agentweb.DefaultWebClient
 import com.just.agentweb.WebChromeClient
 import com.just.agentweb.WebViewClient
@@ -102,6 +101,10 @@ class WebActivity : AppCompatActivity() {
             maybeException = Exception("Error code: ${error.errorCode}, ${error.description}")
             this@WebActivity.finish()
         }
+
+        override fun onPageFinished(viwe: WebView, url: String) {
+            maybeException = null
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -118,7 +121,6 @@ class WebActivity : AppCompatActivity() {
         val port = intent.getStringExtra(EXTRA_KEY_PORT)
         url = "${MainActivity.DEFAULT_PROTOCOL}://$ip:$port"
 
-        AgentWebConfig.debug()
         layout = findViewById(R.id.container)
         agentWeb = AgentWeb.with(this)
             .setAgentWebParent(layout, LinearLayout.LayoutParams(-1, -1))
