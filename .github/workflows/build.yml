@@ -36,7 +36,7 @@ jobs:
             - name: Build
               run: |
                   chmod +x ./gradlew
-                  ./gradlew assembleRelease --stacktrace
+                  ./gradlew :app:assembleDebug
 
             - name: Release
               uses: softprops/action-gh-release@v2
