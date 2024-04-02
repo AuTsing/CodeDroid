@@ -19,4 +19,6 @@ jobs:
                   java-version: '17.0.9+9'
 
             - name: Build
-              run: ./gradlew
+              run: |
+                  chmod +x ./gradlew
+                  ./gradlew
