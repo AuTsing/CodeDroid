@@ -32,6 +32,7 @@ jobs:
                   echo 'STORE_PASSWORD=${{ secrets.KEY_PASSWORD }}\n' > ./local.properties
                   echo 'KEY_ALIAS=./${{ secrets.KEY_ALIAS }}\n' > ./local.properties
                   echo 'KEY_PASSWORD=./${{ secrets.KEY_PASSWORD }}\n' > ./local.properties
+                  cat ./local.properties
 
             - name: Build
               run: |
