@@ -29,17 +29,16 @@ jobs:
               run: |
                   touch ./local.properties
                   echo 'STORE_FILE=./store.jks' >> ./local.properties
-                  echo 'STORE_PASSWORD=test' >> ./local.properties
-                  echo 'KEY_ALIAS=test' >> ./local.properties
-                  echo 'KEY_PASSWORD=test' >> ./local.properties
-                  cat ./local.properties
+                  echo 'STORE_PASSWORD=${{ secrets.STORE_PASSWORD }}' >> ./local.properties
+                  echo 'KEY_ALIAS=${{ secrets.KEY_ALIAS }}' >> ./local.properties
+                  echo 'KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}' >> ./local.properties
 
-            # - name: Build
-            #   run: |
-            #       chmod +x ./gradlew
-            #       ./gradlew assembleRelease
+            - name: Build
+              run: |
+                  chmod +x ./gradlew
+                  ./gradlew assembleRelease
 
-            # - name: Release
-            #   uses: softprops/action-gh-release@v2
-            #   with:
-            #       files: ./app/build/outputs/apk/release/*.apk
+            - name: Release
+              uses: softprops/action-gh-release@v2
+              with:
+                  files: ./app/build/outputs/apk/release/*.apk
