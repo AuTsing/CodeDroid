@@ -16,6 +16,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.just.agentweb.AgentWeb
@@ -87,8 +88,8 @@ class WebActivity : AppCompatActivity() {
     }
     private val webViewClient: WebViewClient = object : WebViewClient() {
         override fun shouldOverrideUrlLoading(
-            view: WebView?,
-            request: WebResourceRequest?,
+            view: WebView,
+            request: WebResourceRequest,
         ): Boolean {
             return false
         }
@@ -116,6 +117,11 @@ class WebActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        window.statusBarColor = getColor(R.color.vscode_dark_1)
+        window.navigationBarColor = getColor(R.color.vscode_dark_2)
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars =
+            false
 
         val ip = intent.getStringExtra(EXTRA_KEY_IP)
         val port = intent.getStringExtra(EXTRA_KEY_PORT)

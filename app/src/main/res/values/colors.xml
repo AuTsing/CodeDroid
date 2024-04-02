@@ -2,4 +2,6 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="vscode_dark_1">#FF181818</color>
+    <color name="vscode_dark_2">#FF1F1F1F</color>
 </resources>
