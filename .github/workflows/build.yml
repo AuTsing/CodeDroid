@@ -36,4 +36,4 @@ jobs:
             - name: Build
               run: |
                   chmod +x ./gradlew
-                  ./gradlew
+                  ./gradlew assembleRelease --stacktrace
