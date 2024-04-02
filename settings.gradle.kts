@@ -20,5 +20,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "CodeDroid2"
+rootProject.name = "CodeDroid"
 include(":app")

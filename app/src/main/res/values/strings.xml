@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">CodeDroid2</string>
+    <string name="app_name">CodeDroid</string>
     <string name="text_activity_finish_confirmation">再次点击退出</string>
 </resources>
