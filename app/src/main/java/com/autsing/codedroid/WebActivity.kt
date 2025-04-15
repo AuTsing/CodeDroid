@@ -1,5 +1,6 @@
 package com.autsing.codedroid
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -15,6 +16,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -27,10 +29,17 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 
 class WebActivity : AppCompatActivity() {
+
     companion object {
-        const val EXTRA_KEY_IP = "ip"
-        const val EXTRA_KEY_PORT = "port"
-        var maybeException: Exception? = null
+        const val EXTRA_KEY_URL = "url"
+
+        var maybeException: String? = null
+
+        fun startActivity(context: Context, url: String) {
+            val intent = Intent(context, WebActivity::class.java)
+            intent.putExtra(EXTRA_KEY_URL, url)
+            context.startActivity(intent)
+        }
     }
 
     private var url: String = ""
@@ -43,7 +52,7 @@ class WebActivity : AppCompatActivity() {
             RESULT_OK -> {
                 val uris = mutableListOf<Uri>()
                 it.data?.dataString?.let { ds ->
-                    val uri = Uri.parse(ds)
+                    val uri = ds.toUri()
                     uris.add(uri)
                 }
                 it.data?.clipData?.let { cds ->
@@ -69,15 +78,15 @@ class WebActivity : AppCompatActivity() {
             params: FileChooserParams,
         ): Boolean {
             lifecycleScope.launch {
-                try {
+                runCatching {
                     val intent = params.createIntent()
                     fileChooserLauncher.launch(intent)
                     val uris = fileChooserChannel.receive().getOrThrow()
                     cb.onReceiveValue(uris)
-                } catch (e: Exception) {
+                }.onFailure {
                     Toast.makeText(
                         this@WebActivity,
-                        "打开文件选择器失败: ${e.message}",
+                        "打开文件选择器失败: ${it.message}",
                         Toast.LENGTH_SHORT,
                     ).show()
                     cb.onReceiveValue(null)
@@ -99,12 +108,7 @@ class WebActivity : AppCompatActivity() {
             request: WebResourceRequest,
             error: WebResourceError,
         ) {
-            maybeException = Exception("Error code: ${error.errorCode}, ${error.description}")
-            this@WebActivity.finish()
-        }
-
-        override fun onPageFinished(viwe: WebView, url: String) {
-            maybeException = null
+            maybeException = "Error code: ${error.errorCode}, ${error.description}"
         }
     }
 
@@ -123,9 +127,7 @@ class WebActivity : AppCompatActivity() {
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars =
             false
 
-        val ip = intent.getStringExtra(EXTRA_KEY_IP)
-        val port = intent.getStringExtra(EXTRA_KEY_PORT)
-        url = "${MainActivity.DEFAULT_PROTOCOL}://$ip:$port"
+        url = intent.getStringExtra(EXTRA_KEY_URL) ?: ""
 
         layout = findViewById(R.id.container)
         agentWeb = AgentWeb.with(this)

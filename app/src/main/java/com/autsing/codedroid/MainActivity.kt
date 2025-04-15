@@ -1,7 +1,8 @@
 package com.autsing.codedroid
 
-import android.content.Intent
+import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.widget.Button
@@ -15,13 +16,12 @@ import androidx.core.view.WindowInsetsCompat
 class MainActivity : AppCompatActivity() {
     companion object {
         const val TAG: String = "CodeDroid"
-        const val DEFAULT_PROTOCOL = "http"
-        const val DEFAULT_IP = "127.0.0.1"
-        const val DEFAULT_PORT = "8080"
+        private const val DEFAULT_PROTOCOL = "http"
+        private const val DEFAULT_IP = "127.0.0.1"
+        private const val DEFAULT_PORT = "8080"
     }
 
-    private lateinit var inputIp: EditText
-    private lateinit var inputPort: EditText
+    private lateinit var inputUrl: EditText
     private lateinit var textErrorMessage: TextView
     private lateinit var buttonGo: Button
 
@@ -35,21 +35,19 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        inputIp = findViewById(R.id.input_ip)
-        inputPort = findViewById(R.id.input_port)
+        inputUrl = findViewById(R.id.input_url)
         textErrorMessage = findViewById(R.id.text_error_message)
         buttonGo = findViewById(R.id.button_go)
 
-        inputIp.setText(DEFAULT_IP)
-        inputPort.setText(DEFAULT_PORT)
+        @SuppressLint("SetTextI18n")
+        inputUrl.setText("$DEFAULT_PROTOCOL://$DEFAULT_IP:$DEFAULT_PORT")
         buttonGo.performClick()
     }
 
     override fun onResume() {
         super.onResume()
-        WebActivity.maybeException?.let {
-            textErrorMessage.text = it.message
-        }
+        textErrorMessage.text = WebActivity.maybeException
+        Log.d(TAG, "onResume: ${WebActivity.maybeException}")
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
@@ -61,9 +59,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun onClickGo(view: View) {
-        val intent = Intent(this, WebActivity::class.java)
-        intent.putExtra(WebActivity.EXTRA_KEY_IP, inputIp.text.toString())
-        intent.putExtra(WebActivity.EXTRA_KEY_PORT, inputPort.text.toString())
-        startActivity(intent)
+        val url = inputUrl.text.toString()
+        WebActivity.startActivity(this, url)
     }
 }
