@@ -2,7 +2,6 @@ package com.autsing.codedroid
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.widget.Button
@@ -47,7 +46,6 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         textErrorMessage.text = WebActivity.maybeException
-        Log.d(TAG, "onResume: ${WebActivity.maybeException}")
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
