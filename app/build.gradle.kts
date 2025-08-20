@@ -8,12 +8,12 @@ plugins {
 
 android {
     namespace = "com.autsing.codedroid"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.autsing.codedroid"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 20100
         versionName = "2.1.0"
 

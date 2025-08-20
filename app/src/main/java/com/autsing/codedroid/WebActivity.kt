@@ -109,9 +109,6 @@ class WebActivity : AppCompatActivity() {
             error: WebResourceError,
         ) {
             maybeException = "Error code: ${error.errorCode}, ${error.description}"
-            if (error.errorCode == -6) {
-                finish()
-            }
         }
     }
 
