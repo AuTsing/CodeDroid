@@ -1,5 +1,6 @@
 package com.autsing.codedroid
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -25,7 +26,7 @@ import com.just.agentweb.AgentWeb
 import com.just.agentweb.DefaultWebClient
 import com.just.agentweb.WebChromeClient
 import com.just.agentweb.WebViewClient
-import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.launch
 
 class WebActivity : AppCompatActivity() {
@@ -43,30 +44,25 @@ class WebActivity : AppCompatActivity() {
     }
 
     private var url: String = ""
+    private var loaded: Boolean = false
     private var tryFinishAt: Long = 0
-    private val fileChooserChannel = Channel<Result<Array<Uri>>>()
+    private var fileChooserCompletable: CompletableDeferred<List<Uri>> = CompletableDeferred()
     private val fileChooserLauncher: ActivityResultLauncher<Intent> = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult(),
     ) {
-        when (it.resultCode) {
-            RESULT_OK -> {
-                val uris = mutableListOf<Uri>()
-                it.data?.dataString?.let { ds ->
-                    val uri = ds.toUri()
-                    uris.add(uri)
-                }
-                it.data?.clipData?.let { cds ->
-                    for (i in 0..cds.itemCount) {
-                        val cd = cds.getItemAt(i)
-                        uris.add(cd.uri)
-                    }
-                }
-                fileChooserChannel.trySend(Result.success(uris.toTypedArray()))
+        if (it.resultCode == RESULT_OK) {
+            val uris = mutableListOf<Uri>()
+            it.data?.dataString?.let { ds ->
+                uris.add(ds.toUri())
             }
-
-            RESULT_CANCELED -> fileChooserChannel.trySend(Result.success(emptyArray()))
-
-            RESULT_FIRST_USER -> fileChooserChannel.trySend(Result.failure(Exception("RESULT_FIRST_USER")))
+            it.data?.clipData?.let { cds ->
+                for (i in 0 until cds.itemCount) {
+                    uris.add(cds.getItemAt(i).uri)
+                }
+            }
+            fileChooserCompletable.complete(uris)
+        } else {
+            fileChooserCompletable.complete(emptyList())
         }
     }
     private lateinit var layout: ConstraintLayout
@@ -80,15 +76,11 @@ class WebActivity : AppCompatActivity() {
             lifecycleScope.launch {
                 runCatching {
                     val intent = params.createIntent()
+                    fileChooserCompletable = CompletableDeferred()
                     fileChooserLauncher.launch(intent)
-                    val uris = fileChooserChannel.receive().getOrThrow()
-                    cb.onReceiveValue(uris)
+                    val uris = fileChooserCompletable.await()
+                    cb.onReceiveValue(uris.toTypedArray())
                 }.onFailure {
-                    Toast.makeText(
-                        this@WebActivity,
-                        "打开文件选择器失败: ${it.message}",
-                        Toast.LENGTH_SHORT,
-                    ).show()
                     cb.onReceiveValue(null)
                 }
             }
@@ -108,7 +100,16 @@ class WebActivity : AppCompatActivity() {
             request: WebResourceRequest,
             error: WebResourceError,
         ) {
-            maybeException = "Error code: ${error.errorCode}, ${error.description}"
+            maybeException = "Exception: ${error.errorCode}, ${error.description}"
+            if (!loaded) {
+                finish()
+            }
+        }
+
+        override fun onPageFinished(view: WebView, url: String) {
+            if (url.contains(this@WebActivity.url)) {
+                loaded = true
+            }
         }
     }
 
@@ -144,6 +145,13 @@ class WebActivity : AppCompatActivity() {
             .go(url);
     }
 
+    override fun onDestroy() {
+        agentWeb.clearWebCache()
+        agentWeb.destroy()
+        super.onDestroy()
+    }
+
+    @SuppressLint("GestureBackNavigation")
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             val now = System.currentTimeMillis()
