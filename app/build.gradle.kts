@@ -16,8 +16,6 @@ android {
         targetSdk = 36
         versionCode = 20102
         versionName = "2.1.2"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     signingConfigs {
@@ -72,8 +70,5 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    implementation("io.github.justson:agentweb-core:v5.1.1-androidx")
+    implementation(libs.agentweb.core)
 }
