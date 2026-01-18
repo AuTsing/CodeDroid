@@ -1,6 +1,6 @@
 package com.autsing.codedroid
 
-import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.View
@@ -11,14 +11,47 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.widget.addTextChangedListener
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+private const val DEFAULT_URL = "http://127.0.0.1:8080"
+private val KEY_URL = stringPreferencesKey("key_url")
+private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "main_prefs")
+
+private suspend fun readUrl(context: Context): Result<String> = withContext(Dispatchers.IO) {
+    runCatching {
+        return@runCatching context.dataStore
+            .data
+            .map { it[KEY_URL] ?: DEFAULT_URL }
+            .first()
+    }
+}
+
+private suspend fun writeUrl(
+    context: Context,
+    url: String,
+): Result<Unit> = withContext(Dispatchers.IO) {
+    runCatching {
+        context.dataStore
+            .updateData {
+                it.toMutablePreferences().also { preferences ->
+                    preferences[KEY_URL] = url
+                }
+            }
+        return@runCatching
+    }
+}
 
 class MainActivity : AppCompatActivity() {
-    companion object {
-        const val TAG: String = "CodeDroid"
-        private const val DEFAULT_PROTOCOL = "http"
-        private const val DEFAULT_IP = "127.0.0.1"
-        private const val DEFAULT_PORT = "8080"
-    }
 
     private lateinit var inputUrl: EditText
     private lateinit var textErrorMessage: TextView
@@ -35,12 +68,25 @@ class MainActivity : AppCompatActivity() {
         }
 
         inputUrl = findViewById(R.id.input_url)
+        inputUrl.addTextChangedListener {
+            lifecycleScope.launch {
+                runCatching {
+                    writeUrl(this@MainActivity, it.toString()).getOrThrow()
+                }
+            }
+        }
         textErrorMessage = findViewById(R.id.text_error_message)
         buttonGo = findViewById(R.id.button_go)
 
-        @SuppressLint("SetTextI18n")
-        inputUrl.setText("$DEFAULT_PROTOCOL://$DEFAULT_IP:$DEFAULT_PORT")
-        buttonGo.performClick()
+        lifecycleScope.launch {
+            runCatching {
+                val url = readUrl(this@MainActivity).getOrThrow()
+                inputUrl.setText(url)
+                buttonGo.performClick()
+            }.onFailure {
+                textErrorMessage.text = it.message
+            }
+        }
     }
 
     override fun onResume() {

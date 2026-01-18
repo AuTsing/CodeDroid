@@ -71,4 +71,5 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.agentweb.core)
+    implementation("androidx.datastore:datastore-preferences:1.2.0")
 }
